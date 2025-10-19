@@ -190,84 +190,122 @@
   </main>
 
   <script>
-    // Tasks
-    const TASKS = [
-      "2x elite boss",
-      "2x world boss",
-      "guild check in",
-      "guild cargo",
-      "500 activity merits",
-      "400 focus life skill",
-      "buru commission x3",
-      "unstable realms x2"
-    ];
+  // Tasks
+  const TASKS = [
+    "2x elite boss",
+    "2x world boss",
+    "guild check in",
+    "guild cargo",
+    "500 activity merits",
+    "400 focus life skill",
+    "buru commission x3",
+    "unstable realms x2"
+  ];
 
-    const KEY = "daily-missions-v1"; // localStorage key
-    const today = new Date();
-    document.getElementById('dateSub').textContent =
-      today.toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"short", day:"numeric" });
+  const KEY = "daily-missions-v1"; // localStorage key
+  const META_KEY = "daily-missions-meta"; // track reset time
+  const TZ_OFFSET = 8; // UTC+8
+  const RESET_HOUR = 15; // 3 PM
 
-    // Load saved state
-    const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  const today = new Date();
+  document.getElementById('dateSub').textContent =
+    today.toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"short", day:"numeric" });
 
-    const list = document.getElementById("missionList");
+  // Load saved state
+  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  const meta = JSON.parse(localStorage.getItem(META_KEY) || "{}");
 
-    // Build items
-    TASKS.forEach((text, idx) => {
-      const id = `task-${idx}`;
-      const checked = !!saved[id];
+  // --- Check whether we should auto-reset ---
+  function shouldReset() {
+    const nowUtc = new Date();
+    // convert UTC to UTC+8
+    const now = new Date(nowUtc.getTime() + TZ_OFFSET * 60 * 60 * 1000);
 
-      const row = document.createElement("label");
-      row.className = `item${checked ? " done" : ""}`;
-      row.setAttribute("for", id);
+    const y = now.getUTCFullYear();
+    const m = now.getUTCMonth();
+    const d = now.getUTCDate();
 
-      const box = document.createElement("input");
-      box.type = "checkbox";
-      box.id = id;
-      box.checked = checked;
-      box.setAttribute("aria-label", text);
+    const resetTime = new Date(Date.UTC(y, m, d, RESET_HOUR - TZ_OFFSET, 0, 0)); // 3 PM UTC+8 local equivalent
+    const lastReset = meta.lastReset ? new Date(meta.lastReset) : null;
 
-      const span = document.createElement("span");
-      span.className = "label";
-      span.textContent = text;
+    // If last reset missing or before today's reset window
+    if (!lastReset || now > resetTime && lastReset < resetTime) {
+      return true;
+    }
+    return false;
+  }
 
-      row.appendChild(box);
-      row.appendChild(span);
-      list.appendChild(row);
+  function performReset() {
+    Object.keys(saved).forEach(k => saved[k] = false);
+    localStorage.setItem(KEY, JSON.stringify(saved));
+    meta.lastReset = new Date().toISOString();
+    localStorage.setItem(META_KEY, JSON.stringify(meta));
+  }
 
-      // Toggle handler
-      box.addEventListener("change", () => {
-        saved[id] = box.checked;
-        localStorage.setItem(KEY, JSON.stringify(saved));
-        row.classList.toggle("done", box.checked);
-        updateProgress();
-      });
-    });
+  if (shouldReset()) {
+    performReset();
+  }
 
-    // Reset button
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-      Object.keys(saved).forEach(k => saved[k] = false);
+  // Build UI
+  const list = document.getElementById("missionList");
+
+  TASKS.forEach((text, idx) => {
+    const id = `task-${idx}`;
+    const checked = !!saved[id];
+
+    const row = document.createElement("label");
+    row.className = `item${checked ? " done" : ""}`;
+    row.setAttribute("for", id);
+
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.id = id;
+    box.checked = checked;
+    box.setAttribute("aria-label", text);
+
+    const span = document.createElement("span");
+    span.className = "label";
+    span.textContent = text;
+
+    row.appendChild(box);
+    row.appendChild(span);
+    list.appendChild(row);
+
+    // Toggle handler
+    box.addEventListener("change", () => {
+      saved[id] = box.checked;
       localStorage.setItem(KEY, JSON.stringify(saved));
-      document.querySelectorAll('.item').forEach(el => el.classList.remove('done'));
+      row.classList.toggle("done", box.checked);
       updateProgress();
     });
+  });
 
-    // Progress visual
-    function updateProgress(){
-      const boxes = [...document.querySelectorAll('input[type="checkbox"]')];
-      const done = boxes.filter(b => b.checked).length;
-      const total = boxes.length;
-      const pct = Math.round((done / total) * 100);
-
-      const circumference = 2 * Math.PI * 34; // r=34
-      const offset = circumference * (1 - pct/100);
-      document.getElementById("ring").style.strokeDashoffset = offset.toFixed(2);
-      document.getElementById("progressLabel").textContent = `${pct}%`;
-
-      document.getElementById("summary").textContent = `${done} / ${total} completed`;
-    }
+  // Reset button
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    Object.keys(saved).forEach(k => saved[k] = false);
+    localStorage.setItem(KEY, JSON.stringify(saved));
+    document.querySelectorAll('.item').forEach(el => el.classList.remove('done'));
+    meta.lastReset = new Date().toISOString();
+    localStorage.setItem(META_KEY, JSON.stringify(meta));
     updateProgress();
-  </script>
+  });
+
+  // Progress visual
+  function updateProgress(){
+    const boxes = [...document.querySelectorAll('input[type="checkbox"]')];
+    const done = boxes.filter(b => b.checked).length;
+    const total = boxes.length;
+    const pct = Math.round((done / total) * 100);
+
+    const circumference = 2 * Math.PI * 34; // r=34
+    const offset = circumference * (1 - pct/100);
+    document.getElementById("ring").style.strokeDashoffset = offset.toFixed(2);
+    document.getElementById("progressLabel").textContent = `${pct}%`;
+    document.getElementById("summary").textContent = `${done} / ${total} completed`;
+  }
+  updateProgress();
+</script>
+
 </body>
 </html>
