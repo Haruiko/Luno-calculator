@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Missions</title>
+  <style>
+    :root{
+      --bg-dark:#0e1621;
+      --panel:#1b2838;
+      --panel-2:#172230;
+      --text:#e5e9f0;
+      --muted:#a3b1c6;
+      --accent:#4f8cc9;
+      --accent-2:#5fa0e0;
+      --success:#3fb950;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1000px 600px at 80% -10%, rgba(79,140,201,.15), transparent 60%),
+                  radial-gradient(800px 500px at -10% 120%, rgba(79,140,201,.12), transparent 60%),
+                  var(--bg-dark);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+    }
+
+    .card{
+      width: min(800px, 100%);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    h1{
+      margin:0;
+      font-size:1.6rem;
+      color:var(--accent);
+      letter-spacing:.2px;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .home-link{
+      text-decoration:none;
+      color:var(--accent);
+      background:rgba(79,140,201,.08);
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid rgba(79,140,201,.25);
+      transition:.2s ease;
+      font-weight:600;
+    }
+    .home-link:hover{ background:rgba(95,160,224,.18); }
+
+    /* Progress ring */
+    .progress{
+      position:relative;
+      width:82px; height:82px;
+    }
+    .progress svg{ transform:rotate(-90deg) }
+    .progress .track{ stroke:rgba(255,255,255,.08) }
+    .progress .indicator{ stroke:var(--accent-2); transition:stroke-dashoffset .35s ease }
+    .progress .label{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:.95rem; color:var(--text);
+    }
+
+    /* Checklist */
+    .list{
+      margin-top:10px;
+      display:grid;
+      gap:10px;
+    }
+    .item{
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition:.2s ease;
+    }
+    .item:hover{
+      border-color: rgba(95,160,224,.35);
+      box-shadow: 0 0 0 3px rgba(79,140,201,.12) inset;
+    }
+    input[type="checkbox"]{
+      appearance:none;
+      width:22px;height:22px;border-radius:6px;
+      border:2px solid rgba(255,255,255,.25);
+      background:transparent; display:grid; place-items:center;
+      cursor:pointer; transition:.2s;
+    }
+    input[type="checkbox"]::before{
+      content:"";
+      width:12px;height:12px;border-radius:3px;background:transparent;
+      transform:scale(0); transition:.18s ease;
+    }
+    input[type="checkbox"]:checked{
+      border-color:var(--accent-2); background:rgba(95,160,224,.15);
+    }
+    input[type="checkbox"]:checked::before{
+      background:var(--accent-2); transform:scale(1);
+    }
+    .label{
+      flex:1;
+      color:var(--text);
+      font-size:1.02rem;
+      user-select:none;
+    }
+    .done .label{ color:var(--muted); text-decoration:line-through; }
+
+    .row-end{
+      margin-top:16px;
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .btn{
+      background:rgba(79,140,201,.1);
+      border:1px solid rgba(79,140,201,.35);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer; transition:.2s; font-weight:600;
+    }
+    .btn:hover{ background:rgba(95,160,224,.2) }
+    .btn.secondary{
+      background:transparent; border-color:rgba(255,255,255,.18); color:var(--muted);
+    }
+    .btn.secondary:hover{ border-color:rgba(255,255,255,.35); color:var(--text); }
+    footer{ margin-top:14px; color:var(--muted); font-size:.9rem; text-align:right; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <header>
+      <div>
+        <h1>Daily Missions</h1>
+        <div class="sub" id="dateSub">Track your day’s tasks.</div>
+      </div>
+      <div class="topbar">
+        <a class="home-link" href="index.html">← Home</a>
+
+        <!-- Progress circle -->
+        <div class="progress" aria-hidden="true">
+          <svg width="82" height="82">
+            <circle class="track" cx="41" cy="41" r="34" stroke-width="8" fill="none"/>
+            <circle class="indicator" id="ring" cx="41" cy="41" r="34" stroke-width="8" fill="none"
+                    stroke-linecap="round" stroke-dasharray="213.628" stroke-dashoffset="213.628"/>
+          </svg>
+          <div class="label" id="progressLabel">0%</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="list" id="missionList">
+      <!-- Items created by JS for cleaner storage keys -->
+    </section>
+
+    <div class="row-end">
+      <button class="btn secondary" id="resetBtn" title="Uncheck all tasks">Reset</button>
+    </div>
+
+    <footer id="summary">0 / 8 completed</footer>
+  </main>
+
+  <script>
+    // Tasks
+    const TASKS = [
+      "2x elite boss",
+      "2x world boss",
+      "guild check in",
+      "guild cargo",
+      "500 activity merits",
+      "400 focus life skill",
+      "buru commission x1",
+      "unstable realms x2"
+    ];
+
+    const KEY = "daily-missions-v1"; // localStorage key
+    const today = new Date();
+    document.getElementById('dateSub').textContent =
+      today.toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"short", day:"numeric" });
+
+    // Load saved state
+    const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+
+    const list = document.getElementById("missionList");
+
+    // Build items
+    TASKS.forEach((text, idx) => {
+      const id = `task-${idx}`;
+      const checked = !!saved[id];
+
+      const row = document.createElement("label");
+      row.className = `item${checked ? " done" : ""}`;
+      row.setAttribute("for", id);
+
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.id = id;
+      box.checked = checked;
+      box.setAttribute("aria-label", text);
+
+      const span = document.createElement("span");
+      span.className = "label";
+      span.textContent = text;
+
+      row.appendChild(box);
+      row.appendChild(span);
+      list.appendChild(row);
+
+      // Toggle handler
+      box.addEventListener("change", () => {
+        saved[id] = box.checked;
+        localStorage.setItem(KEY, JSON.stringify(saved));
+        row.classList.toggle("done", box.checked);
+        updateProgress();
+      });
+    });
+
+    // Reset button
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      Object.keys(saved).forEach(k => saved[k] = false);
+      localStorage.setItem(KEY, JSON.stringify(saved));
+      document.querySelectorAll('.item').forEach(el => el.classList.remove('done'));
+      updateProgress();
+    });
+
+    // Progress visual
+    function updateProgress(){
+      const boxes = [...document.querySelectorAll('input[type="checkbox"]')];
+      const done = boxes.filter(b => b.checked).length;
+      const total = boxes.length;
+      const pct = Math.round((done / total) * 100);
+
+      const circumference = 2 * Math.PI * 34; // r=34
+      const offset = circumference * (1 - pct/100);
+      document.getElementById("ring").style.strokeDashoffset = offset.toFixed(2);
+      document.getElementById("progressLabel").textContent = `${pct}%`;
+
+      document.getElementById("summary").textContent = `${done} / ${total} completed`;
+    }
+    updateProgress();
+  </script>
+</body>
+</html>
