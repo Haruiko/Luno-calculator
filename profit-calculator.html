@@ -5,22 +5,59 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Metal Crafting Profit Calculator</title>
 <style>
-  :root { --gap: 10px; --pad: 12px; --radius: 10px; --muted:#6b7280; }
+  /* palette tuned to the screenshot */
+  :root{
+    --bg:#0b1220;           /* page background */
+    --card:#0f172a;         /* cards */
+    --border:#1f2937;       /* subtle borders */
+    --muted:#94a3b8;        /* secondary text */
+    --text:#e2e8f0;         /* primary text */
+    --accent:#2563eb;       /* blue accents */
+    --gap:10px; --pad:12px; --radius:12px;
+  }
+
   * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-  body { margin: 0; padding: 20px; background: #0f172a; color: #e5e7eb; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--text); }
   h1,h2,h3 { margin: 0 0 8px; }
   .wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
-  .card { background: #111827; border: 1px solid #1f2937; border-radius: var(--radius); padding: var(--pad); }
+
+  /* Header bar with Home button */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 18px; background: var(--card); border:1px solid var(--border);
+    border-radius: 16px;
+  }
+  .topbar h1{ margin:0; font-size: 24px; }
+  .home-btn{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+    border-radius: 10px; border:1px solid #334155; background:#0b1220; color:var(--text);
+    text-decoration:none; font-weight:500;
+  }
+  .home-btn:hover{ border-color:#60a5fa; background:#0f172a; }
+  .home-btn .arrow{ font-size:16px; line-height:1; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--pad); }
   .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); align-items: center; }
   .row + .row { margin-top: var(--gap); }
+
+  /* responsive inputs row so “Deposit fee” can sit beside Daily focus */
+  .inputs-row{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--gap);
+    align-items: start;
+  }
+
   label { font-size: 12px; color: var(--muted); display:block; margin-bottom: 6px; }
   input[type="number"], input[type="text"] {
-    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #374151; background: #0b1220; color: #e5e7eb;
+    width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #334155;
+    background: #0b1220; color: var(--text);
   }
-  input[type="number"]:focus, input[type="text"]:focus { outline: 2px solid #2563eb22; border-color: #2563eb66; }
-  button { border: 1px solid #374151; background: #0b1220; color: #e5e7eb; padding: 10px 12px; border-radius: 8px; cursor:pointer; }
-  button:hover { border-color:#4b5563; background:#0f172a; }
-  .primary { background:#1f2937; border-color:#374151; }
+  input[type="number"]:focus, input[type="text"]:focus { outline: 2px solid #2563eb22; border-color: #60a5fa; }
+
+  button { border: 1px solid #334155; background: #0b1220; color: var(--text); padding: 10px 12px; border-radius: 10px; cursor:pointer; }
+  button:hover { border-color:#60a5fa; background:#0f172a; }
+
   .danger { background:#3b0d0d; border-color:#7f1d1d; }
   .success { color:#34d399; }
   .warn { color:#f59e0b; }
@@ -28,7 +65,7 @@
   .flex { display:flex; gap:10px; flex-wrap:wrap; }
   .right { text-align:right; }
   .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .pill { font-size: 12px; padding: 4px 8px; border-radius: 999px; border:1px solid #374151; background:#0b1220; }
+  .pill { font-size: 12px; padding: 4px 8px; border-radius: 999px; border:1px solid #334155; background:#0b1220; }
   .hr { height:1px; background:#1f2937; margin: 12px 0; border:0; }
   .table { width:100%; border-collapse: collapse; }
   .table th, .table td { border-bottom:1px solid #1f2937; padding:10px; text-align:left; }
@@ -41,32 +78,47 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Metal Crafting Profit Calculator</h1>
-    <div class="muted small">Edit materials, success chances, and prices. All results update instantly.</div>
+
+    <!-- Top header with Home -->
+    <div class="topbar">
+      <div>
+        <h1>Metal Crafting Profit Calculator</h1>
+        <div class="muted small">Edit materials, success chances, and prices. All results update instantly.</div>
+      </div>
+      <a class="home-btn" href="index.html"><span class="arrow">←</span> Home</a>
+    </div>
 
     <!-- Product & Focus Config -->
     <div class="card">
-      <div class="row">
-        <div class="col" style="grid-column: span 3;">
+      <div class="inputs-row">
+        <div>
           <label>Product sale price (luno)</label>
           <input id="salePrice" type="number" min="0" step="0.01" value="2012">
         </div>
 
         <!-- Crafts per day override -->
-        <div class="col" style="grid-column: span 3;">
+        <div>
           <label>Crafts per day (override, optional)</label>
           <input id="craftsPerDayInput" type="number" min="0" step="1" placeholder="auto">
         </div>
 
-        <div class="col" style="grid-column: span 2;">
+        <div>
           <label>Focus per craft</label>
           <input id="focusPerCraft" type="number" min="1" step="1" value="10">
         </div>
-        <div class="col" style="grid-column: span 2;">
+
+        <div>
           <label>Daily focus available</label>
           <input id="dailyFocus" type="number" min="0" step="1" value="300">
         </div>
-        <div class="col" style="grid-column: span 2;">
+
+        <!-- NEW: Deposit fee -->
+        <div>
+          <label>Deposit fee (luno / day)</label>
+          <input id="depositFee" type="number" min="0" step="0.01" value="0">
+        </div>
+
+        <div>
           <label>Optional: Market fee (%)</label>
           <input id="feePct" type="number" min="0" step="0.01" value="0">
         </div>
@@ -92,9 +144,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody id="materialsBody">
-          <!-- Rows injected by JS -->
-        </tbody>
+        <tbody id="materialsBody"></tbody>
         <tfoot>
           <tr>
             <td colspan="3" class="right total">Total materials cost / craft</td>
@@ -124,9 +174,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody id="probBody">
-          <!-- Rows injected by JS -->
-        </tbody>
+        <tbody id="probBody"></tbody>
         <tfoot>
           <tr>
             <td class="right total" colspan="2">Expected items / craft</td>
@@ -186,11 +234,14 @@
             <div style="grid-column: span 8;">Materials cost per day</div>
             <div class="right" style="grid-column: span 4;"><span id="matPerDay">—</span> luno</div>
           </div>
-
-          <!-- NEW: items crafted per day -->
           <div class="row">
             <div style="grid-column: span 8;">Items crafted per day (expected)</div>
             <div class="right" style="grid-column: span 4;"><span id="itemsPerDay">—</span></div>
+          </div>
+          <!-- NEW: show deposit fee impact -->
+          <div class="row">
+            <div style="grid-column: span 8;">Deposit fee (per day)</div>
+            <div class="right" style="grid-column: span 4;"><span id="depositPerDay">—</span> luno</div>
           </div>
 
           <hr class="hr">
@@ -199,6 +250,7 @@
             <div class="right" style="grid-column: span 4;"><span id="profitPerDay">—</span> luno</div>
           </div>
         </div>
+      </div>
       <div class="footer" id="footerNote"></div>
     </div>
   </div>
@@ -230,7 +282,8 @@
       feePct: q('#feePct').value,
       focusPerCraft: q('#focusPerCraft').value,
       dailyFocus: q('#dailyFocus').value,
-      craftsPerDayInput: q('#craftsPerDayInput').value
+      craftsPerDayInput: q('#craftsPerDayInput').value,
+      depositFee: q('#depositFee').value
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
@@ -247,6 +300,7 @@
       if (data.focusPerCraft !== undefined) q('#focusPerCraft').value = data.focusPerCraft;
       if (data.dailyFocus !== undefined) q('#dailyFocus').value = data.dailyFocus;
       if (data.craftsPerDayInput !== undefined) q('#craftsPerDayInput').value = data.craftsPerDayInput;
+      if (data.depositFee !== undefined) q('#depositFee').value = data.depositFee;
     } catch(e) {
       console.warn('Failed to load saved data:', e);
     }
@@ -335,8 +389,9 @@
   const focusPerCraft     = q('#focusPerCraft');
   const dailyFocus        = q('#dailyFocus');
   const craftsPerDayInput = q('#craftsPerDayInput');
+  const depositFee        = q('#depositFee');
 
-  [salePrice, feePct, focusPerCraft, dailyFocus, craftsPerDayInput].forEach(inp => {
+  [salePrice, feePct, focusPerCraft, dailyFocus, craftsPerDayInput, depositFee].forEach(inp => {
     inp.addEventListener('input', () => { compute(); saveState(); });
   });
 
@@ -362,8 +417,10 @@
     const matsPerDayUnits = materials.map(m=>({name:m.name||'Material', qty:(+m.qty||0)*craftsPerDay}));
     const matPerDay = matPerCraft * craftsPerDay;
     const revPerDay = revPerCraft * craftsPerDay;
-    const profitPerDay = revPerDay - matPerDay;
     const itemsPerDay = expectedItems * craftsPerDay;
+
+    const deposit = (+depositFee.value || 0); // per-day flat
+    const profitPerDay = revPerDay - matPerDay - deposit;
 
     q('#materialsTotal').innerText = fmt(matPerCraft);
     q('#expectedItems').innerText = fmt(expectedItems);
@@ -376,6 +433,7 @@
     q('#revPerDay').innerText = fmt(revPerDay);
     q('#matPerDay').innerText = fmt(matPerDay);
     q('#profitPerDay').innerText = fmt(profitPerDay);
+    q('#depositPerDay').innerText = fmt(deposit);
     q('#matsPerDay').innerText = matsPerDayUnits.length?matsPerDayUnits.map(m=>`${fmt(m.qty)} × ${m.name}`).join(', '):'—';
     const itemsEl=q('#itemsPerDay'); if(itemsEl) itemsEl.innerText=fmt(itemsPerDay);
 
@@ -383,6 +441,7 @@
     const note=[];
     if(Math.abs(pSum-100)>1e-9) note.push('Probabilities sum ≠ 100%.');
     if((+feePct.value||0)===0) note.push('No market fee applied.');
+    if((+depositFee.value||0)===0) note.push('No deposit fee applied.');
     if(overrideStr!=='') note.push('Crafts/day overridden.');
     q('#footerNote').innerText=note.join('  ');
   }
