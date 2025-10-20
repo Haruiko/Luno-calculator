@@ -269,8 +269,8 @@
   <div class="container">
     <div class="topbar">
       <div>
-        <h1>Boss Spawn Timers</h1>
-        <div class="sub">Track elite and world boss spawn times</div>
+        <h1>Mythical Creature Timers</h1>
+        <div class="sub">Track mythical creature spawn times in Blue Protocol</div>
       </div>
       <a class="home-link" href="index.html">← Home</a>
     </div>
@@ -280,14 +280,6 @@
       <h2 style="color: var(--accent); margin-bottom: 8px;">🕐 Current Time (Philippine Time)</h2>
       <div id="currentTime" style="font-size: 1.5rem; font-weight: 600; font-family: 'Courier New', monospace;"></div>
       <div style="color: var(--muted); font-size: 0.9rem; margin-top: 4px;">UTC+8 (Philippine Standard Time)</div>
-    </div>
-
-    <!-- Elite Bosses Section -->
-    <div class="card" style="margin-bottom: 20px;">
-      <h2 style="color: var(--accent); margin-bottom: 16px;">⚔️ Elite Bosses</h2>
-      <div class="boss-grid" id="bossGrid">
-        <!-- Boss cards will be generated here -->
-      </div>
     </div>
 
     <!-- Mythical Creatures Section -->
@@ -301,11 +293,8 @@
     <div class="controls-section">
       <div class="controls-title">Global Controls</div>
       <div class="global-controls">
-        <button class="btn success" id="startAllBtn">▶️ Start All Timers</button>
-        <button class="btn danger" id="resetAllBtn">🔄 Reset All Timers</button>
         <button class="btn" id="toggleSoundBtn">🔊 Sound: ON</button>
-        <button class="btn" id="addBossBtn">➕ Add Boss</button>
-        <button class="btn" id="editBossBtn">✏️ Edit Bosses</button>
+        <button class="btn" id="addCreatureBtn">➕ Add Creature</button>
         <button class="btn" id="exportBtn">📤 Export</button>
         <button class="btn" id="importBtn">📥 Import</button>
       </div>
@@ -315,16 +304,13 @@
   <script>
     class BossTimer {
       constructor() {
-        this.bosses = this.loadBosses();
         this.mythicalCreatures = this.loadMythicalCreatures();
         this.soundEnabled = localStorage.getItem('bossTimerSound') !== 'false';
-        this.intervals = {};
         this.mythicalIntervals = {};
         this.notifications = [];
         this.currentTime = new Date();
         
         this.initializeUI();
-        this.startAllTimers();
         this.startMythicalTracking();
         this.startClock();
         this.requestNotificationPermission();
@@ -461,7 +447,6 @@
       }
 
       initializeUI() {
-        this.renderBosses();
         this.renderMythicalCreatures();
         this.setupEventListeners();
         this.updateSoundButton();
@@ -677,121 +662,90 @@
       }
 
       setupEventListeners() {
-        document.getElementById('startAllBtn').addEventListener('click', () => {
-          this.bosses.forEach(boss => {
-            if (!boss.lastKilled) {
-              boss.lastKilled = Date.now();
-            }
-          });
-          this.saveBosses();
-          this.startAllTimers();
-        });
-
-        document.getElementById('resetAllBtn').addEventListener('click', () => {
-          this.resetAllTimers();
-        });
-
         document.getElementById('toggleSoundBtn').addEventListener('click', () => {
           this.toggleSound();
         });
 
-        document.getElementById('addBossBtn').addEventListener('click', () => {
-          this.addCustomBoss();
-        });
-
-        document.getElementById('editBossBtn').addEventListener('click', () => {
-          this.showEditMode();
+        document.getElementById('addCreatureBtn').addEventListener('click', () => {
+          this.addCustomCreature();
         });
 
         document.getElementById('exportBtn').addEventListener('click', () => {
-          this.exportBossData();
+          this.exportCreatureData();
         });
 
         document.getElementById('importBtn').addEventListener('click', () => {
-          this.importBossData();
+          this.importCreatureData();
         });
       }
 
-      addCustomBoss() {
-        const name = prompt('Enter boss name:');
+      addCustomCreature() {
+        const name = prompt('Enter creature name:');
         if (!name) return;
 
-        const location = prompt('Enter boss location:') || 'Unknown';
-        const spawnMinutes = parseInt(prompt('Enter spawn interval in minutes:')) || 120;
-        const type = prompt('Enter boss type (Elite Boss/World Boss):') || 'Elite Boss';
-        const description = prompt('Enter boss description:') || 'Custom boss';
+        const location = prompt('Enter creature location:') || 'Unknown';
+        const level = prompt('Enter creature level (e.g., Lv.1):') || 'Lv.1';
+        const type = 'Mythical Creature';
+        const description = prompt('Enter creature description:') || 'Custom mythical creature';
 
-        const boss = {
-          id: `custom_${Date.now()}`,
-          name,
-          type,
-          location,
-          spawnInterval: spawnMinutes,
-          lastKilled: null,
-          description
-        };
-
-        this.bosses.push(boss);
-        this.saveBosses();
-        this.renderBosses();
-      }
-
-      editBoss(bossId) {
-        const boss = this.bosses.find(b => b.id === bossId);
-        if (!boss) return;
-
-        const name = prompt('Boss name:', boss.name);
-        if (name === null) return;
-
-        const location = prompt('Boss location:', boss.location);
-        if (location === null) return;
-
-        const spawnMinutes = parseInt(prompt('Spawn interval (minutes):', boss.spawnInterval));
-        if (isNaN(spawnMinutes)) return;
-
-        const type = prompt('Boss type:', boss.type);
-        if (type === null) return;
-
-        const description = prompt('Boss description:', boss.description);
-        if (description === null) return;
-
-        boss.name = name;
-        boss.location = location;
-        boss.spawnInterval = spawnMinutes;
-        boss.type = type;
-        boss.description = description;
-
-        this.saveBosses();
-        this.renderBosses();
+        const spawnType = prompt('Spawn type:\n1. Daily at specific times\n2. Regular intervals\nEnter 1 or 2:');
         
-        // Restart timer if it was running
-        if (boss.lastKilled) {
-          this.startTimer(bossId);
+        let creature;
+        if (spawnType === '1') {
+          const times = prompt('Enter spawn times (24-hour format, comma separated, e.g., 18:00,22:00,02:00):');
+          if (!times) return;
+          
+          creature = {
+            id: `custom_${Date.now()}`,
+            name,
+            type,
+            location,
+            level,
+            spawnTimes: times.split(',').map(t => t.trim()),
+            lastSeen: null,
+            description
+          };
+        } else if (spawnType === '2') {
+          const interval = parseInt(prompt('Enter spawn interval in minutes:')) || 120;
+          
+          creature = {
+            id: `custom_${Date.now()}`,
+            name,
+            type,
+            location,
+            level,
+            spawnInterval: interval,
+            lastSeen: null,
+            description
+          };
+        } else {
+          return;
         }
+
+        this.mythicalCreatures.push(creature);
+        this.saveMythicalCreatures();
+        this.renderMythicalCreatures();
+        this.startMythicalTracking();
       }
 
-      showEditMode() {
-        alert('💡 TIP: Click the ✏️ button on any boss card to edit it, or use the Import button to load Blue Protocol boss data from a JSON file.');
-      }
-
-      exportBossData() {
+      exportCreatureData() {
         const data = {
           version: '1.0',
           timestamp: new Date().toISOString(),
           game: 'Blue Protocol Star Resonance',
-          bosses: this.bosses
+          mythicalCreatures: this.mythicalCreatures
         };
         
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `blue-protocol-bosses-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `blue-protocol-creatures-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
       }
 
-      importBossData() {
+      importCreatureData() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.json';
@@ -805,29 +759,30 @@
             try {
               const data = JSON.parse(e.target.result);
               
-              if (!data.bosses || !Array.isArray(data.bosses)) {
-                alert('Invalid boss data format. Please check your JSON file.');
+              if (!data.mythicalCreatures || !Array.isArray(data.mythicalCreatures)) {
+                alert('Invalid creature data format. Please check your JSON file.');
                 return;
               }
               
-              if (confirm(`Import ${data.bosses.length} bosses? This will replace your current boss list.`)) {
+              if (confirm(`Import ${data.mythicalCreatures.length} creatures? This will replace your current creature list.`)) {
                 // Reset all existing timers
-                Object.keys(this.intervals).forEach(id => {
-                  clearInterval(this.intervals[id]);
+                Object.keys(this.mythicalIntervals).forEach(id => {
+                  clearInterval(this.mythicalIntervals[id]);
                 });
-                this.intervals = {};
+                this.mythicalIntervals = {};
                 
-                // Import new bosses
-                this.bosses = data.bosses.map(boss => ({
-                  ...boss,
-                  id: boss.id || `imported_${Date.now()}_${Math.random()}`,
-                  lastKilled: null // Reset kill times
+                // Import new creatures
+                this.mythicalCreatures = data.mythicalCreatures.map(creature => ({
+                  ...creature,
+                  id: creature.id || `imported_${Date.now()}_${Math.random()}`,
+                  lastSeen: null // Reset seen times
                 }));
                 
-                this.saveBosses();
-                this.renderBosses();
+                this.saveMythicalCreatures();
+                this.renderMythicalCreatures();
+                this.startMythicalTracking();
                 
-                alert(`Successfully imported ${this.bosses.length} bosses!`);
+                alert(`Successfully imported ${this.mythicalCreatures.length} creatures!`);
               }
             } catch (err) {
               alert('Error parsing JSON file: ' + err.message);
@@ -896,7 +851,8 @@
         if (!creature) return;
 
         const now = new Date();
-        const philippineTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // Convert to Philippine time
+        // Use proper timezone conversion for Philippine time
+        const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
         
         const timerElement = document.getElementById(`mythical-timer-${creatureId}`);
         const statusElement = document.getElementById(`mythical-status-${creatureId}`);
@@ -1008,10 +964,11 @@
 
       updateClock() {
         const now = new Date();
-        const philippineTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        // Convert to Philippine Standard Time (UTC+8)
+        const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
         
         const timeString = philippineTime.toLocaleTimeString('en-PH', {
-          hour12: false,
+          hour12: true,
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit'
