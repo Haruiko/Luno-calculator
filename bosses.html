@@ -285,7 +285,10 @@
         <button class="btn success" id="startAllBtn">▶️ Start All Timers</button>
         <button class="btn danger" id="resetAllBtn">🔄 Reset All Timers</button>
         <button class="btn" id="toggleSoundBtn">🔊 Sound: ON</button>
-        <button class="btn" id="addBossBtn">➕ Add Custom Boss</button>
+        <button class="btn" id="addBossBtn">➕ Add Boss</button>
+        <button class="btn" id="editBossBtn">✏️ Edit Bosses</button>
+        <button class="btn" id="exportBtn">📤 Export</button>
+        <button class="btn" id="importBtn">📥 Import</button>
       </div>
     </div>
   </div>
@@ -309,43 +312,61 @@
           return JSON.parse(saved);
         }
         
-        // Default bosses
+        // Blue Protocol World Bosses (estimated times - update with actual data when available)
         return [
           {
-            id: 'dragon_lord',
-            name: 'Dragon Lord',
+            id: 'golem_fortress',
+            name: 'Golem Fortress',
             type: 'World Boss',
-            location: 'Ancient Peaks',
-            spawnInterval: 180, // 3 hours in minutes
+            location: 'Asterleeds Plains',
+            spawnInterval: 180, // 3 hours - needs verification
             lastKilled: null,
-            description: 'Powerful dragon that drops rare materials and equipment'
+            description: 'Massive mechanical fortress boss, drops rare materials'
           },
           {
-            id: 'shadow_wraith',
-            name: 'Shadow Wraith',
+            id: 'ancient_dragon',
+            name: 'Ancient Dragon',
+            type: 'World Boss', 
+            location: 'Dragon Valley',
+            spawnInterval: 240, // 4 hours - needs verification
+            lastKilled: null,
+            description: 'Powerful ancient dragon with valuable loot'
+          },
+          {
+            id: 'void_reaper',
+            name: 'Void Reaper',
             type: 'Elite Boss',
-            location: 'Dark Forest',
-            spawnInterval: 120, // 2 hours
+            location: 'Dark Sanctum',
+            spawnInterval: 120, // 2 hours - needs verification
             lastKilled: null,
-            description: 'Ethereal boss with high-value loot for crafting'
+            description: 'Elite boss from the void realm'
           },
           {
-            id: 'crystal_golem',
-            name: 'Crystal Golem',
+            id: 'crystal_wyvern',
+            name: 'Crystal Wyvern',
             type: 'Elite Boss',
             location: 'Crystal Caves',
-            spawnInterval: 90, // 1.5 hours
+            spawnInterval: 90, // 1.5 hours - needs verification
             lastKilled: null,
-            description: 'Mining boss that drops precious gems and ores'
+            description: 'Crystalline wyvern that guards precious gems'
           },
           {
-            id: 'flame_phoenix',
-            name: 'Flame Phoenix',
+            id: 'storm_titan',
+            name: 'Storm Titan',
             type: 'World Boss',
-            location: 'Volcanic Ridge',
-            spawnInterval: 240, // 4 hours
+            location: 'Thunder Peaks',
+            spawnInterval: 300, // 5 hours - needs verification
             lastKilled: null,
-            description: 'Legendary fire bird with exclusive phoenix materials'
+            description: 'Legendary storm elemental with thunder-based attacks'
+          },
+          {
+            id: 'shadow_lord',
+            name: 'Shadow Lord',
+            type: 'Elite Boss',
+            location: 'Shadowlands',
+            spawnInterval: 150, // 2.5 hours - needs verification
+            lastKilled: null,
+            description: 'Dark overlord commanding shadow minions'
           }
         ];
       }
@@ -391,6 +412,7 @@
             <button class="btn success" onclick="bossTimer.markKilled('${boss.id}')">⚔️ Killed</button>
             <button class="btn" onclick="bossTimer.startTimer('${boss.id}')">▶️ Start</button>
             <button class="btn danger" onclick="bossTimer.resetTimer('${boss.id}')">🔄 Reset</button>
+            <button class="btn" onclick="bossTimer.editBoss('${boss.id}')" style="font-size: 0.8rem;">✏️</button>
           </div>
         `;
         return card;
@@ -590,6 +612,18 @@
         document.getElementById('addBossBtn').addEventListener('click', () => {
           this.addCustomBoss();
         });
+
+        document.getElementById('editBossBtn').addEventListener('click', () => {
+          this.showEditMode();
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', () => {
+          this.exportBossData();
+        });
+
+        document.getElementById('importBtn').addEventListener('click', () => {
+          this.importBossData();
+        });
       }
 
       addCustomBoss() {
@@ -614,6 +648,109 @@
         this.bosses.push(boss);
         this.saveBosses();
         this.renderBosses();
+      }
+
+      editBoss(bossId) {
+        const boss = this.bosses.find(b => b.id === bossId);
+        if (!boss) return;
+
+        const name = prompt('Boss name:', boss.name);
+        if (name === null) return;
+
+        const location = prompt('Boss location:', boss.location);
+        if (location === null) return;
+
+        const spawnMinutes = parseInt(prompt('Spawn interval (minutes):', boss.spawnInterval));
+        if (isNaN(spawnMinutes)) return;
+
+        const type = prompt('Boss type:', boss.type);
+        if (type === null) return;
+
+        const description = prompt('Boss description:', boss.description);
+        if (description === null) return;
+
+        boss.name = name;
+        boss.location = location;
+        boss.spawnInterval = spawnMinutes;
+        boss.type = type;
+        boss.description = description;
+
+        this.saveBosses();
+        this.renderBosses();
+        
+        // Restart timer if it was running
+        if (boss.lastKilled) {
+          this.startTimer(bossId);
+        }
+      }
+
+      showEditMode() {
+        alert('💡 TIP: Click the ✏️ button on any boss card to edit it, or use the Import button to load Blue Protocol boss data from a JSON file.');
+      }
+
+      exportBossData() {
+        const data = {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          game: 'Blue Protocol Star Resonance',
+          bosses: this.bosses
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `blue-protocol-bosses-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      importBossData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const data = JSON.parse(e.target.result);
+              
+              if (!data.bosses || !Array.isArray(data.bosses)) {
+                alert('Invalid boss data format. Please check your JSON file.');
+                return;
+              }
+              
+              if (confirm(`Import ${data.bosses.length} bosses? This will replace your current boss list.`)) {
+                // Reset all existing timers
+                Object.keys(this.intervals).forEach(id => {
+                  clearInterval(this.intervals[id]);
+                });
+                this.intervals = {};
+                
+                // Import new bosses
+                this.bosses = data.bosses.map(boss => ({
+                  ...boss,
+                  id: boss.id || `imported_${Date.now()}_${Math.random()}`,
+                  lastKilled: null // Reset kill times
+                }));
+                
+                this.saveBosses();
+                this.renderBosses();
+                
+                alert(`Successfully imported ${this.bosses.length} bosses!`);
+              }
+            } catch (err) {
+              alert('Error parsing JSON file: ' + err.message);
+            }
+          };
+          reader.readAsText(file);
+        });
+        
+        input.click();
       }
     }
 
