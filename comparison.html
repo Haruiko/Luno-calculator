@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Luno Calculator Comparison</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --card:#0f172a;
+    --border:#1f2937;
+    --muted:#94a3b8;
+    --text:#e2e8f0;
+    --accent:#2563eb;
+    --success:#22c55e;
+    --warning:#f59e0b;
+    --error:#ef4444;
+    --gap:10px; --pad:12px; --radius:12px;
+  }
+
+  * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--text); }
+  h1,h2,h3 { margin: 0 0 8px; }
+  .wrap { max-width: 1400px; margin: 0 auto; display: grid; gap: 16px; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 18px; background: var(--card); border:1px solid var(--border);
+    border-radius: 16px;
+  }
+  .topbar h1{ margin:0; font-size: 24px; }
+  .home-btn{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+    border-radius: 10px; border:1px solid #334155; background:#0b1220; color:var(--text);
+    text-decoration:none; font-weight:500;
+  }
+  .home-btn:hover{ border-color:#60a5fa; background:#0f172a; }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 16px;
+  }
+
+  .scenario-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--pad);
+    position: relative;
+  }
+
+  .scenario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .scenario-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .remove-scenario {
+    background: var(--error);
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .quick-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .quick-inputs label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .quick-inputs input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .results-summary {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    font-size: 13px;
+  }
+
+  .result-row.highlight {
+    font-weight: 600;
+    color: var(--success);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+
+  .add-scenario-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 16px auto;
+    display: block;
+  }
+
+  .comparison-summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .best-scenario {
+    color: var(--success);
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .comparison-grid {
+      grid-template-columns: 1fr;
+    }
+    .quick-inputs {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Profit Calculator Comparison</h1>
+        <div style="color: var(--muted); font-size: 14px;">Compare multiple crafting scenarios side-by-side</div>
+      </div>
+      <a class="home-btn" href="index.html"><span>←</span> Home</a>
+    </div>
+
+    <div id="scenariosContainer" class="comparison-grid">
+      <!-- Scenarios will be added here -->
+    </div>
+
+    <button id="addScenario" class="add-scenario-btn">+ Add Scenario</button>
+
+    <div id="summaryCard" class="comparison-summary" style="display: none;">
+      <h3>Comparison Summary</h3>
+      <div id="summaryContent"></div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  let scenarios = [];
+  let scenarioCounter = 1;
+
+  const container = document.getElementById('scenariosContainer');
+  const summaryCard = document.getElementById('summaryCard');
+  const summaryContent = document.getElementById('summaryContent');
+
+  function createScenario() {
+    const scenario = {
+      id: Date.now(),
+      name: `Scenario ${scenarioCounter++}`,
+      salePrice: 2000,
+      materialCost: 1500,
+      successRate: 75,
+      focusPerCraft: 10,
+      dailyFocus: 300
+    };
+    
+    scenarios.push(scenario);
+    renderScenarios();
+    updateSummary();
+  }
+
+  function removeScenario(id) {
+    scenarios = scenarios.filter(s => s.id !== id);
+    renderScenarios();
+    updateSummary();
+  }
+
+  function updateScenario(id, field, value) {
+    const scenario = scenarios.find(s => s.id === id);
+    if (scenario) {
+      scenario[field] = parseFloat(value) || 0;
+      renderScenarios();
+      updateSummary();
+    }
+  }
+
+  function calculateResults(scenario) {
+    const successRateDecimal = scenario.successRate / 100;
+    const revenue = scenario.salePrice * successRateDecimal;
+    const profit = revenue - scenario.materialCost;
+    const profitPerFocus = profit / scenario.focusPerCraft;
+    const craftsPerDay = Math.floor(scenario.dailyFocus / scenario.focusPerCraft);
+    const dailyProfit = profit * craftsPerDay;
+
+    return {
+      revenue,
+      profit,
+      profitPerFocus,
+      craftsPerDay,
+      dailyProfit
+    };
+  }
+
+  function formatNumber(num) {
+    if (!isFinite(num)) return '—';
+    return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+
+  function renderScenarios() {
+    container.innerHTML = '';
+    
+    scenarios.forEach(scenario => {
+      const results = calculateResults(scenario);
+      
+      const card = document.createElement('div');
+      card.className = 'scenario-card';
+      card.innerHTML = `
+        <div class="scenario-header">
+          <input type="text" class="scenario-title" value="${scenario.name}" 
+                 onchange="updateScenario(${scenario.id}, 'name', this.value)">
+          <button class="remove-scenario" onclick="removeScenario(${scenario.id})">×</button>
+        </div>
+        
+        <div class="quick-inputs">
+          <div>
+            <label>Sale Price (luno)</label>
+            <input type="number" value="${scenario.salePrice}" 
+                   onchange="updateScenario(${scenario.id}, 'salePrice', this.value)">
+          </div>
+          <div>
+            <label>Material Cost</label>
+            <input type="number" value="${scenario.materialCost}" 
+                   onchange="updateScenario(${scenario.id}, 'materialCost', this.value)">
+          </div>
+          <div>
+            <label>Success Rate (%)</label>
+            <input type="number" value="${scenario.successRate}" min="0" max="100"
+                   onchange="updateScenario(${scenario.id}, 'successRate', this.value)">
+          </div>
+          <div>
+            <label>Focus per Craft</label>
+            <input type="number" value="${scenario.focusPerCraft}" min="1"
+                   onchange="updateScenario(${scenario.id}, 'focusPerCraft', this.value)">
+          </div>
+          <div>
+            <label>Daily Focus</label>
+            <input type="number" value="${scenario.dailyFocus}" min="0"
+                   onchange="updateScenario(${scenario.id}, 'dailyFocus', this.value)">
+          </div>
+        </div>
+
+        <div class="results-summary">
+          <div class="result-row">
+            <span>Revenue per craft:</span>
+            <span>${formatNumber(results.revenue)} luno</span>
+          </div>
+          <div class="result-row">
+            <span>Profit per craft:</span>
+            <span>${formatNumber(results.profit)} luno</span>
+          </div>
+          <div class="result-row">
+            <span>Profit per focus:</span>
+            <span>${formatNumber(results.profitPerFocus)} luno</span>
+          </div>
+          <div class="result-row">
+            <span>Crafts per day:</span>
+            <span>${formatNumber(results.craftsPerDay)}</span>
+          </div>
+          <div class="result-row highlight">
+            <span>Daily Profit:</span>
+            <span>${formatNumber(results.dailyProfit)} luno</span>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(card);
+    });
+  }
+
+  function updateSummary() {
+    if (scenarios.length < 2) {
+      summaryCard.style.display = 'none';
+      return;
+    }
+
+    summaryCard.style.display = 'block';
+    
+    const results = scenarios.map(scenario => ({
+      name: scenario.name,
+      ...calculateResults(scenario)
+    }));
+
+    // Find best scenarios
+    const bestDaily = results.reduce((a, b) => a.dailyProfit > b.dailyProfit ? a : b);
+    const bestPerFocus = results.reduce((a, b) => a.profitPerFocus > b.profitPerFocus ? a : b);
+    const bestPerCraft = results.reduce((a, b) => a.profit > b.profit ? a : b);
+
+    summaryContent.innerHTML = `
+      <div class="result-row">
+        <span>Best Daily Profit:</span>
+        <span class="best-scenario">${bestDaily.name} (${formatNumber(bestDaily.dailyProfit)} luno/day)</span>
+      </div>
+      <div class="result-row">
+        <span>Best Profit per Focus:</span>
+        <span class="best-scenario">${bestPerFocus.name} (${formatNumber(bestPerFocus.profitPerFocus)} luno/focus)</span>
+      </div>
+      <div class="result-row">
+        <span>Best Profit per Craft:</span>
+        <span class="best-scenario">${bestPerCraft.name} (${formatNumber(bestPerCraft.profit)} luno/craft)</span>
+      </div>
+    `;
+  }
+
+  // Global functions for inline event handlers
+  window.updateScenario = updateScenario;
+  window.removeScenario = removeScenario;
+
+  document.getElementById('addScenario').addEventListener('click', createScenario);
+
+  // Start with one scenario
+  createScenario();
+})();
+</script>
+</body>
+</html>
