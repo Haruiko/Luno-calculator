@@ -1,0 +1,13 @@
+// Combined JavaScript for all pages
+
+// General functionality
+// ...shared JavaScript code...
+
+// Profit Calculator functionality
+// ...specific JavaScript for profit-calculator.html...
+
+// Daily Missions functionality
+// ...specific JavaScript for daily-missions.html...
+
+// Channel Active Boss functionality
+// ...specific JavaScript for channels.html...

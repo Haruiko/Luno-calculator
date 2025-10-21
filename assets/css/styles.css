@@ -1,0 +1,39 @@
+/* Combined CSS for all pages */
+
+/* General styles */
+:root {
+  --bg-dark: #0e1621;
+  --panel: #1b2838;
+  --panel-2: #172230;
+  --text: #e5e9f0;
+  --muted: #a3b1c6;
+  --accent: #4f8cc9;
+  --accent-2: #5fa0e0;
+  --success: #3fb950;
+  --warning: #f59e0b;
+  --active: #22c55e;
+  --gap: 10px;
+  --pad: 12px;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* Profit Calculator styles */
+/* ...specific styles for profit-calculator.html... */
+
+/* Daily Missions styles */
+/* ...specific styles for daily-missions.html... */
+
+/* Channel Active Boss styles */
+/* ...specific styles for channels.html... */
