@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Blue Protocol Channel List - Track and manage server channels">
+  <title>Channel List - Luno Calculator</title>
+  <style>
+    :root{
+      --bg-dark:#0e1621;
+      --panel:#1b2838;
+      --panel-2:#172230;
+      --text:#e5e9f0;
+      --muted:#a3b1c6;
+      --accent:#4f8cc9;
+      --accent-2:#5fa0e0;
+      --success:#3fb950;
+      --warning:#f59e0b;
+      --active:#22c55e;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1000px 600px at 80% -10%, rgba(79,140,201,.15), transparent 60%),
+                  radial-gradient(800px 500px at -10% 120%, rgba(79,140,201,.12), transparent 60%),
+                  var(--bg-dark);
+      color:var(--text);
+      min-height:100vh;
+      padding: 24px;
+    }
+
+    .container{
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .topbar h1{
+      margin:0;
+      font-size:1.8rem;
+      color:var(--accent);
+      letter-spacing:.2px;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:.95rem;
+      margin-top: 4px;
+    }
+
+    .home-link{
+      text-decoration:none;
+      color:var(--accent);
+      background:rgba(79,140,201,.08);
+      padding:12px 16px;
+      border-radius:10px;
+      border:1px solid rgba(79,140,201,.25);
+      transition:.2s ease;
+      font-weight:600;
+    }
+    .home-link:hover{ background:rgba(95,160,224,.18); }
+
+    .controls-section{
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.3);
+    }
+
+    .search-container{
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-input{
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      background: var(--bg-dark);
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-input:focus{
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,140,201,.1);
+    }
+
+    .search-input::placeholder{
+      color: var(--muted);
+    }
+
+    .control-buttons{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn{
+      background: rgba(79,140,201,.1);
+      border: 1px solid rgba(79,140,201,.35);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: .2s;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .btn:hover{
+      background: rgba(95,160,224,.2);
+      border-color: rgba(95,160,224,.5);
+    }
+
+    .btn.danger{
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #ef4444;
+    }
+
+    .btn.danger:hover{
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .stats-info{
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .stat-item{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-value{
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .channels-section{
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.3);
+    }
+
+    .section-title{
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .channels-grid{
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .channel-btn{
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--text);
+      padding: 12px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .channel-btn:hover{
+      background: rgba(79,140,201,.1);
+      border-color: rgba(79,140,201,.3);
+      transform: translateY(-1px);
+    }
+
+    .channel-btn.active{
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--active);
+      color: var(--active);
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+    }
+
+    .channel-btn.hidden{
+      display: none;
+    }
+
+    .active-channels{
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+
+    .active-channels .channels-grid{
+      margin-bottom: 0;
+    }
+
+    .no-results{
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-style: italic;
+    }
+
+    .no-active{
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 16px; }
+      .topbar { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 12px; 
+      }
+      .channels-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+      .channel-btn {
+        padding: 10px 6px;
+        font-size: 0.8rem;
+      }
+      .search-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control-buttons {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .channels-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .stats-info {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>Channel List</h1>
+        <div class="sub">Manage and track server channels 1-450</div>
+      </div>
+      <a class="home-link" href="index.html">← Home</a>
+    </div>
+
+    <div class="controls-section">
+      <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search channels (e.g., 1, 50-60, 100)">
+        <div class="control-buttons">
+          <button class="btn" id="clearSearchBtn">Clear</button>
+          <button class="btn danger" id="clearActiveBtn">Clear Active</button>
+        </div>
+      </div>
+      
+      <div class="stats-info">
+        <div class="stat-item">
+          <span>📊 Total Channels:</span>
+          <span class="stat-value" id="totalChannels">450</span>
+        </div>
+        <div class="stat-item">
+          <span>🔍 Visible:</span>
+          <span class="stat-value" id="visibleChannels">450</span>
+        </div>
+        <div class="stat-item">
+          <span>✅ Active:</span>
+          <span class="stat-value" id="activeCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="channels-section">
+      <div class="section-title">
+        📋 All Channels
+      </div>
+      <div class="channels-grid" id="channelsGrid">
+        <!-- Channels will be generated here -->
+      </div>
+      <div class="no-results" id="noResults" style="display: none;">
+        No channels found matching your search.
+      </div>
+
+      <div class="active-channels" id="activeSection" style="display: none;">
+        <div class="section-title">
+          ✅ Active Channels
+        </div>
+        <div class="channels-grid" id="activeChannelsGrid">
+          <!-- Active channels will be moved here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class ChannelManager {
+      constructor() {
+        this.activeChannels = this.loadActiveChannels();
+        this.allChannels = [];
+        
+        this.initializeChannels();
+        this.setupEventListeners();
+        this.updateStats();
+      }
+
+      loadActiveChannels() {
+        const saved = localStorage.getItem('activeChannels');
+        return saved ? JSON.parse(saved) : [];
+      }
+
+      saveActiveChannels() {
+        localStorage.setItem('activeChannels', JSON.stringify(this.activeChannels));
+      }
+
+      initializeChannels() {
+        const channelsGrid = document.getElementById('channelsGrid');
+        const activeChannelsGrid = document.getElementById('activeChannelsGrid');
+        
+        // Create all 450 channels
+        for (let i = 1; i <= 450; i++) {
+          const channelBtn = this.createChannelButton(i);
+          this.allChannels.push(channelBtn);
+          
+          // Add to appropriate grid
+          if (this.activeChannels.includes(i)) {
+            channelBtn.classList.add('active');
+            activeChannelsGrid.appendChild(channelBtn.cloneNode(true));
+            channelsGrid.appendChild(channelBtn);
+          } else {
+            channelsGrid.appendChild(channelBtn);
+          }
+        }
+
+        this.updateActiveSection();
+      }
+
+      createChannelButton(channelNum) {
+        const btn = document.createElement('button');
+        btn.className = 'channel-btn';
+        btn.textContent = channelNum;
+        btn.dataset.channel = channelNum;
+        
+        btn.addEventListener('click', () => {
+          this.toggleChannel(channelNum);
+        });
+
+        return btn;
+      }
+
+      toggleChannel(channelNum) {
+        const isActive = this.activeChannels.includes(channelNum);
+        
+        if (isActive) {
+          // Remove from active
+          this.activeChannels = this.activeChannels.filter(ch => ch !== channelNum);
+        } else {
+          // Add to active
+          this.activeChannels.push(channelNum);
+        }
+
+        this.saveActiveChannels();
+        this.updateChannelStates();
+        this.updateActiveSection();
+        this.updateStats();
+      }
+
+      updateChannelStates() {
+        // Update all channel buttons
+        document.querySelectorAll('.channel-btn').forEach(btn => {
+          const channelNum = parseInt(btn.dataset.channel);
+          if (this.activeChannels.includes(channelNum)) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      }
+
+      updateActiveSection() {
+        const activeSection = document.getElementById('activeSection');
+        const activeChannelsGrid = document.getElementById('activeChannelsGrid');
+        
+        // Clear active channels grid
+        activeChannelsGrid.innerHTML = '';
+        
+        if (this.activeChannels.length > 0) {
+          // Sort active channels and create buttons
+          const sortedActive = [...this.activeChannels].sort((a, b) => a - b);
+          
+          sortedActive.forEach(channelNum => {
+            const btn = this.createChannelButton(channelNum);
+            btn.classList.add('active');
+            activeChannelsGrid.appendChild(btn);
+          });
+          
+          activeSection.style.display = 'block';
+        } else {
+          activeSection.style.display = 'none';
+        }
+      }
+
+      searchChannels(query) {
+        const channelsGrid = document.getElementById('channelsGrid');
+        const noResults = document.getElementById('noResults');
+        let visibleCount = 0;
+
+        if (!query.trim()) {
+          // Show all channels
+          this.allChannels.forEach(btn => {
+            btn.classList.remove('hidden');
+            visibleCount++;
+          });
+        } else {
+          // Parse search query
+          const matches = this.parseSearchQuery(query);
+          
+          this.allChannels.forEach(btn => {
+            const channelNum = parseInt(btn.dataset.channel);
+            if (matches.includes(channelNum)) {
+              btn.classList.remove('hidden');
+              visibleCount++;
+            } else {
+              btn.classList.add('hidden');
+            }
+          });
+        }
+
+        // Show/hide no results message
+        if (visibleCount === 0) {
+          noResults.style.display = 'block';
+        } else {
+          noResults.style.display = 'none';
+        }
+
+        this.updateStats(visibleCount);
+      }
+
+      parseSearchQuery(query) {
+        const matches = [];
+        const parts = query.split(',').map(part => part.trim());
+        
+        parts.forEach(part => {
+          if (part.includes('-')) {
+            // Range (e.g., "50-60")
+            const [start, end] = part.split('-').map(num => parseInt(num.trim()));
+            if (!isNaN(start) && !isNaN(end) && start <= end) {
+              for (let i = Math.max(1, start); i <= Math.min(450, end); i++) {
+                if (!matches.includes(i)) matches.push(i);
+              }
+            }
+          } else {
+            // Single number
+            const num = parseInt(part);
+            if (!isNaN(num) && num >= 1 && num <= 450 && !matches.includes(num)) {
+              matches.push(num);
+            }
+          }
+        });
+        
+        return matches;
+      }
+
+      clearSearch() {
+        document.getElementById('searchInput').value = '';
+        this.searchChannels('');
+      }
+
+      clearActiveChannels() {
+        if (this.activeChannels.length === 0) {
+          return;
+        }
+
+        if (confirm(`Clear all ${this.activeChannels.length} active channels?`)) {
+          this.activeChannels = [];
+          this.saveActiveChannels();
+          this.updateChannelStates();
+          this.updateActiveSection();
+          this.updateStats();
+        }
+      }
+
+      updateStats(visibleCount = null) {
+        document.getElementById('totalChannels').textContent = '450';
+        document.getElementById('visibleChannels').textContent = visibleCount !== null ? visibleCount : '450';
+        document.getElementById('activeCount').textContent = this.activeChannels.length;
+      }
+
+      setupEventListeners() {
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const clearActiveBtn = document.getElementById('clearActiveBtn');
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+          this.searchChannels(e.target.value);
+        });
+
+        // Clear search
+        clearSearchBtn.addEventListener('click', () => {
+          this.clearSearch();
+        });
+
+        // Clear active channels
+        clearActiveBtn.addEventListener('click', () => {
+          this.clearActiveChannels();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+          }
+          if (e.key === 'Escape') {
+            this.clearSearch();
+            searchInput.blur();
+          }
+        });
+      }
+    }
+
+    // Initialize the channel manager
+    document.addEventListener('DOMContentLoaded', () => {
+      new ChannelManager();
+    });
+  </script>
+</body>
+</html>
