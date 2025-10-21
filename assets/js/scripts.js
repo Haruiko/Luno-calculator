@@ -1,6 +1,398 @@
 // Combined JavaScript for all pages
 
 // =============================================================================
+// BOSSES/MYTHICAL CREATURE TIMERS FUNCTIONALITY
+// =============================================================================
+if (document.querySelector('#timersGrid')) {
+document.addEventListener('DOMContentLoaded', function() {
+    const STORAGE_KEY = 'bossTimers';
+    
+    // Elements
+    const addTimerBtn = document.getElementById('addTimerBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const timersGrid = document.getElementById('timersGrid');
+    const noTimers = document.getElementById('noTimers');
+    const totalTimers = document.getElementById('totalTimers');
+    const activeTimers = document.getElementById('activeTimers');
+    const readyTimers = document.getElementById('readyTimers');
+    
+    // Modal elements
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const bossName = document.getElementById('bossName');
+    const spawnTime = document.getElementById('spawnTime');
+    const channel = document.getElementById('channel');
+    const saveTimer = document.getElementById('saveTimer');
+    const cancelTimer = document.getElementById('cancelTimer');
+    
+    let timers = [];
+    let timerIntervals = new Map();
+    
+    // Load saved timers
+    function loadTimers() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                timers = JSON.parse(saved);
+                timers.forEach(timer => {
+                    if (timer.endTime && new Date(timer.endTime) > new Date()) {
+                        startTimerCountdown(timer);
+                    }
+                });
+            } catch (e) {
+                console.warn('Failed to load timers:', e);
+            }
+        }
+    }
+    
+    // Save timers
+    function saveTimers() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(timers));
+    }
+    
+    // Create timer element
+    function createTimerElement(timer) {
+        const card = document.createElement('div');
+        card.className = 'timer-card';
+        card.dataset.timerId = timer.id;
+        
+        const now = new Date();
+        const endTime = timer.endTime ? new Date(timer.endTime) : null;
+        const isActive = endTime && endTime > now;
+        const isReady = endTime && endTime <= now;
+        
+        if (isReady) card.classList.add('ready');
+        else if (isActive) card.classList.add('active');
+        
+        card.innerHTML = `
+            <div class="timer-header">
+                <div class="timer-name">${timer.name}</div>
+                <div class="timer-channel">Ch ${timer.channel}</div>
+            </div>
+            <div class="timer-display ${isReady ? 'ready' : isActive ? 'active' : ''}" id="display-${timer.id}">
+                ${isReady ? 'READY!' : isActive ? formatTimeRemaining(endTime - now) : 'STOPPED'}
+            </div>
+            <div class="timer-controls-card">
+                <button class="btn" onclick="startTimer('${timer.id}')">Start</button>
+                <button class="btn secondary" onclick="resetTimer('${timer.id}')">Reset</button>
+                <button class="btn danger" onclick="deleteTimer('${timer.id}')">Delete</button>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    // Format time remaining
+    function formatTimeRemaining(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Start timer countdown
+    function startTimerCountdown(timer) {
+        if (timerIntervals.has(timer.id)) {
+            clearInterval(timerIntervals.get(timer.id));
+        }
+        
+        const interval = setInterval(() => {
+            const now = new Date();
+            const endTime = new Date(timer.endTime);
+            const remaining = endTime - now;
+            
+            const display = document.getElementById(`display-${timer.id}`);
+            const card = document.querySelector(`[data-timer-id="${timer.id}"]`);
+            
+            if (remaining <= 0) {
+                // Timer finished
+                clearInterval(interval);
+                timerIntervals.delete(timer.id);
+                
+                if (display) {
+                    display.textContent = 'READY!';
+                    display.className = 'timer-display ready';
+                }
+                if (card) {
+                    card.className = 'timer-card ready';
+                }
+                
+                updateStats();
+                
+                // Show notification if possible
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(`${timer.name} is ready!`, {
+                        body: `Boss on channel ${timer.channel} has spawned!`,
+                        icon: '🐉'
+                    });
+                }
+            } else {
+                // Update countdown
+                if (display) {
+                    display.textContent = formatTimeRemaining(remaining);
+                    display.className = 'timer-display active';
+                }
+                if (card) {
+                    card.className = 'timer-card active';
+                }
+            }
+        }, 1000);
+        
+        timerIntervals.set(timer.id, interval);
+    }
+    
+    // Start timer
+    window.startTimer = function(timerId) {
+        const timer = timers.find(t => t.id === timerId);
+        if (timer) {
+            timer.endTime = new Date(Date.now() + timer.spawnTimeMinutes * 60 * 1000).toISOString();
+            saveTimers();
+            startTimerCountdown(timer);
+            updateStats();
+        }
+    };
+    
+    // Reset timer
+    window.resetTimer = function(timerId) {
+        const timer = timers.find(t => t.id === timerId);
+        if (timer) {
+            timer.endTime = null;
+            
+            if (timerIntervals.has(timerId)) {
+                clearInterval(timerIntervals.get(timerId));
+                timerIntervals.delete(timerId);
+            }
+            
+            const display = document.getElementById(`display-${timerId}`);
+            const card = document.querySelector(`[data-timer-id="${timerId}"]`);
+            
+            if (display) {
+                display.textContent = 'STOPPED';
+                display.className = 'timer-display';
+            }
+            if (card) {
+                card.className = 'timer-card';
+            }
+            
+            saveTimers();
+            updateStats();
+        }
+    };
+    
+    // Delete timer
+    window.deleteTimer = function(timerId) {
+        if (confirm('Are you sure you want to delete this timer?')) {
+            timers = timers.filter(t => t.id !== timerId);
+            
+            if (timerIntervals.has(timerId)) {
+                clearInterval(timerIntervals.get(timerId));
+                timerIntervals.delete(timerId);
+            }
+            
+            saveTimers();
+            updateDisplay();
+        }
+    };
+    
+    // Update display
+    function updateDisplay() {
+        timersGrid.innerHTML = '';
+        
+        if (timers.length === 0) {
+            noTimers.style.display = 'block';
+            timersGrid.style.display = 'none';
+        } else {
+            noTimers.style.display = 'none';
+            timersGrid.style.display = 'grid';
+            
+            timers.forEach(timer => {
+                const element = createTimerElement(timer);
+                timersGrid.appendChild(element);
+            });
+        }
+        
+        updateStats();
+    }
+    
+    // Update statistics
+    function updateStats() {
+        const now = new Date();
+        let activeCount = 0;
+        let readyCount = 0;
+        
+        timers.forEach(timer => {
+            if (timer.endTime) {
+                const endTime = new Date(timer.endTime);
+                if (endTime > now) {
+                    activeCount++;
+                } else {
+                    readyCount++;
+                }
+            }
+        });
+        
+        if (totalTimers) totalTimers.textContent = timers.length;
+        if (activeTimers) activeTimers.textContent = activeCount;
+        if (readyTimers) readyTimers.textContent = readyCount;
+    }
+    
+    // Show modal
+    function showModal() {
+        modalOverlay.classList.add('show');
+        bossName.focus();
+    }
+    
+    // Hide modal
+    function hideModal() {
+        modalOverlay.classList.remove('show');
+        bossName.value = '';
+        spawnTime.value = '';
+        channel.value = '';
+    }
+    
+    // Event listeners
+    if (addTimerBtn) {
+        addTimerBtn.addEventListener('click', showModal);
+    }
+    
+    if (modalClose) {
+        modalClose.addEventListener('click', hideModal);
+    }
+    
+    if (cancelTimer) {
+        cancelTimer.addEventListener('click', hideModal);
+    }
+    
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                hideModal();
+            }
+        });
+    }
+    
+    if (saveTimer) {
+        saveTimer.addEventListener('click', () => {
+            const name = bossName.value.trim();
+            const minutes = parseInt(spawnTime.value);
+            const ch = parseInt(channel.value);
+            
+            if (!name || !minutes || !ch) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            if (minutes < 1 || minutes > 1440) {
+                alert('Spawn time must be between 1 and 1440 minutes');
+                return;
+            }
+            
+            if (ch < 1 || ch > 450) {
+                alert('Channel must be between 1 and 450');
+                return;
+            }
+            
+            const timer = {
+                id: crypto.randomUUID(),
+                name: name,
+                spawnTimeMinutes: minutes,
+                channel: ch,
+                endTime: null
+            };
+            
+            timers.push(timer);
+            saveTimers();
+            updateDisplay();
+            hideModal();
+        });
+    }
+    
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            const data = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                timers: timers
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `boss-timers-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+    
+    if (importBtn) {
+        importBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.timers && Array.isArray(data.timers)) {
+                            timers = data.timers.map(t => ({ ...t, id: crypto.randomUUID(), endTime: null }));
+                            saveTimers();
+                            updateDisplay();
+                            alert('Timers imported successfully!');
+                        } else {
+                            alert('Invalid timer file format');
+                        }
+                    } catch (err) {
+                        alert('Error reading timer file: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            });
+            input.click();
+        });
+    }
+    
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', () => {
+            if (timers.length > 0 && confirm(`Delete all ${timers.length} timers?`)) {
+                // Clear all intervals
+                timerIntervals.forEach((interval, id) => {
+                    clearInterval(interval);
+                });
+                timerIntervals.clear();
+                
+                timers = [];
+                saveTimers();
+                updateDisplay();
+            }
+        });
+    }
+    
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+            hideModal();
+        }
+    });
+    
+    // Initialize
+    loadTimers();
+    updateDisplay();
+});
+}
+
+// =============================================================================
 // PROFIT CALCULATOR FUNCTIONALITY
 // =============================================================================
 if (document.querySelector('#salePrice')) {
