@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Blue Protocol Channel List - Track and manage server channels">
-  <title>Channel List - Luno Calculator</title>
+  <meta name="description" content="Blue Protocol Channel Active Boss - Track and manage server channels">
+  <title>Channel Active Boss - Luno Calculator</title>
   <style>
     :root{
       --bg-dark:#0e1621;
@@ -223,9 +223,9 @@
     }
 
     .active-channels{
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
     }
 
     .active-channels .channels-grid{
@@ -285,7 +285,7 @@
   <div class="container">
     <div class="topbar">
       <div>
-        <h1>Channel List</h1>
+        <h1>Channel Active Boss</h1>
         <div class="sub">Manage and track server channels 1-450</div>
       </div>
       <a class="home-link" href="index.html">← Home</a>
@@ -317,6 +317,18 @@
     </div>
 
     <div class="channels-section">
+      <div class="active-channels" id="activeSection">
+        <div class="section-title">
+          ✅ Active Channels
+        </div>
+        <div class="channels-grid" id="activeChannelsGrid">
+          <!-- Active channels will be moved here -->
+        </div>
+        <div class="no-active" id="noActive">
+          No channels selected. Click on channels below to add them here.
+        </div>
+      </div>
+
       <div class="section-title">
         📋 All Channels
       </div>
@@ -325,15 +337,6 @@
       </div>
       <div class="no-results" id="noResults" style="display: none;">
         No channels found matching your search.
-      </div>
-
-      <div class="active-channels" id="activeSection" style="display: none;">
-        <div class="section-title">
-          ✅ Active Channels
-        </div>
-        <div class="channels-grid" id="activeChannelsGrid">
-          <!-- Active channels will be moved here -->
-        </div>
       </div>
     </div>
   </div>
@@ -425,6 +428,7 @@
       updateActiveSection() {
         const activeSection = document.getElementById('activeSection');
         const activeChannelsGrid = document.getElementById('activeChannelsGrid');
+        const noActive = document.getElementById('noActive');
         
         // Clear active channels grid
         activeChannelsGrid.innerHTML = '';
@@ -439,10 +443,17 @@
             activeChannelsGrid.appendChild(btn);
           });
           
-          activeSection.style.display = 'block';
+          // Show active grid, hide no-active message
+          activeChannelsGrid.style.display = 'grid';
+          noActive.style.display = 'none';
         } else {
-          activeSection.style.display = 'none';
+          // Show no-active message, hide active grid
+          activeChannelsGrid.style.display = 'none';
+          noActive.style.display = 'block';
         }
+        
+        // Active section is always visible now
+        activeSection.style.display = 'block';
       }
 
       searchChannels(query) {
