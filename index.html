@@ -5,7 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Luno Calculator Tools - Optimize your crafting profits and daily missions">
   <title>Luno Calculator Tools</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    /* Base colors */
+    :root {
+      --bg-dark: #0e1621;
+      --bg-panel: #1b2838;
+      --accent: #4f8cc9;
+      --text-main: #e5e9f0;
+      --text-muted: #a3b1c6;
+      --hover: #5fa0e0;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto 40px auto;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    a.nav-btn {
+      background-color: var(--bg-panel);
+      color: var(--text-main);
+      text-decoration: none;
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      box-shadow: 0 0 10px rgba(79, 140, 201, 0.2);
+      transition: all 0.25s ease;
+    }
+
+    a.nav-btn:hover {
+      background-color: var(--hover);
+      transform: translateY(-3px);
+      box-shadow: 0 0 18px rgba(79, 140, 201, 0.4);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 20px; }
+      h1 { font-size: 2rem; }
+      p { font-size: 1rem; margin: 0 auto 30px auto; }
+      .nav-buttons { gap: 20px; }
+      a.nav-btn { 
+        padding: 15px 30px; 
+        font-size: 1rem;
+        width: 100%;
+        max-width: 280px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 15px; }
+      h1 { font-size: 1.8rem; }
+      a.nav-btn { 
+        padding: 12px 24px; 
+        font-size: 0.95rem;
+      }
+      .nav-buttons { 
+        flex-direction: column; 
+        align-items: center;
+        gap: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -16,14 +115,11 @@
   <nav class="nav-buttons" role="navigation" aria-label="Main navigation">
     <a href="profit-calculator.html" class="nav-btn" aria-label="Open Profit Calculator">⚙️ Profit Calculator</a>
     <a href="channels.html" class="nav-btn" aria-label="Open Channel Active Boss">📋 Channel Active Boss</a>
-    <a href="bosses.html" class="nav-btn" aria-label="Open Mythical Creature Timers">🐉 Mythical Creatures</a>
     <a href="daily-missions.html" class="nav-btn" aria-label="Open Daily Missions Tracker">📜 Daily Missions</a>
   </nav>
 
   <footer>
     © 2025 Luno Calculator — Designed for optimal trading
   </footer>
-
-  <script src="assets/js/scripts.js"></script>
 </body>
 </html>

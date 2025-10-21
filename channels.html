@@ -5,8 +5,302 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Blue Protocol Channel Active Boss - Track and manage server channels">
   <title>Channel Active Boss - Luno Calculator</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/scripts.js" defer></script>
+  <style>
+    :root {
+      --bg-dark: #0e1621;
+      --panel: #1b2838;
+      --panel-2: #172230;
+      --text: #e5e9f0;
+      --muted: #a3b1c6;
+      --accent: #4f8cc9;
+      --accent-2: #5fa0e0;
+      --success: #3fb950;
+      --warning: #f59e0b;
+      --active: #22c55e;
+      --gap: 10px;
+      --pad: 12px;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .topbar h1 {
+      font-size: 2rem;
+      margin: 0;
+      color: var(--accent);
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 5px;
+    }
+
+    .home-link {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: var(--panel);
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .home-link:hover {
+      color: var(--text);
+      background: var(--accent);
+    }
+
+    .controls-section {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      background: var(--panel-2);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 1rem;
+      min-width: 250px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(79, 140, 201, 0.2);
+    }
+
+    .search-input::placeholder {
+      color: var(--muted);
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--accent-2);
+      transform: translateY(-1px);
+    }
+
+    .btn.danger {
+      background: var(--warning);
+    }
+
+    .btn.danger:hover {
+      background: #d97706;
+    }
+
+    .stats-info {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .channels-section {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .active-channels {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 2px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .channel {
+      background: var(--panel-2);
+      border: 2px solid #444;
+      border-radius: 8px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+
+    .channel:hover {
+      background: #3a4a5c;
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .channel.active {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--active);
+      color: var(--active);
+    }
+
+    .channel.hidden {
+      display: none;
+    }
+
+    .no-active {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      padding: 40px 20px;
+      background: var(--panel-2);
+      border-radius: 8px;
+      border: 2px dashed #444;
+    }
+
+    .no-results {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      padding: 40px 20px;
+      background: var(--panel);
+      border-radius: 8px;
+      border: 2px dashed #444;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      
+      .topbar h1 {
+        font-size: 1.6rem;
+      }
+      
+      .search-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-input {
+        min-width: unset;
+      }
+      
+      .control-buttons {
+        justify-content: center;
+      }
+      
+      .stats-info {
+        justify-content: center;
+        gap: 15px;
+      }
+      
+      .channels-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 8px;
+      }
+      
+      .channel {
+        padding: 10px 6px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .channels-grid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 6px;
+      }
+      
+      .channel {
+        padding: 8px 4px;
+        font-size: 0.85rem;
+      }
+      
+      .stats-info {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -67,5 +361,217 @@
       </div>
     </div>
   </div>
+
+  <script>
+// Enhanced Channels Functionality - Active/Inactive Behavior
+document.addEventListener('DOMContentLoaded', function() {
+    const STORAGE_KEY = 'channelActiveState';
+    const TOTAL_CHANNELS = 450;
+    
+    // Elements
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const clearActiveBtn = document.getElementById('clearActiveBtn');
+    const channelsGrid = document.getElementById('channelsGrid');
+    const activeChannelsGrid = document.getElementById('activeChannelsGrid');
+    const activeSection = document.getElementById('activeSection');
+    const noActive = document.getElementById('noActive');
+    const noResults = document.getElementById('noResults');
+    const totalChannels = document.getElementById('totalChannels');
+    const visibleChannels = document.getElementById('visibleChannels');
+    const activeCount = document.getElementById('activeCount');
+    
+    let activeChannelSet = new Set();
+    let allChannels = [];
+    
+    // Load saved state
+    function loadActiveChannels() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                activeChannelSet = new Set(data);
+            } catch (e) {
+                console.warn('Failed to load active channels:', e);
+            }
+        }
+    }
+    
+    // Save state
+    function saveActiveChannels() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...activeChannelSet]));
+    }
+    
+    // Create channel element
+    function createChannelElement(number, isActive = false, forActiveSection = false) {
+        const channel = document.createElement('div');
+        channel.className = `channel ${isActive ? 'active' : ''}`;
+        channel.textContent = number;
+        channel.dataset.channel = number;
+        
+        channel.addEventListener('click', () => toggleChannel(number));
+        
+        return channel;
+    }
+    
+    // Toggle channel active state
+    function toggleChannel(number) {
+        if (activeChannelSet.has(number)) {
+            // Deactivating channel
+            activeChannelSet.delete(number);
+        } else {
+            // Activating channel
+            activeChannelSet.add(number);
+        }
+        
+        saveActiveChannels();
+        updateChannelDisplay();
+        updateStats();
+    }
+    
+    // Generate all channels
+    function generateChannels() {
+        allChannels = [];
+        for (let i = 1; i <= TOTAL_CHANNELS; i++) {
+            allChannels.push(i);
+        }
+    }
+    
+    // Update channel display with enhanced behavior
+    function updateChannelDisplay() {
+        const searchQuery = searchInput.value.trim().toLowerCase();
+        
+        // Filter channels based on search, but exclude active channels from main grid
+        const allFilteredChannels = filterChannels(searchQuery);
+        const nonActiveChannels = allFilteredChannels.filter(num => !activeChannelSet.has(num));
+        
+        // Clear grids
+        channelsGrid.innerHTML = '';
+        activeChannelsGrid.innerHTML = '';
+        
+        // Show/hide no results for main channels
+        if (nonActiveChannels.length === 0 && searchQuery) {
+            // Check if there are any matching channels at all
+            const hasMatchingChannels = allFilteredChannels.length > 0;
+            if (hasMatchingChannels) {
+                // All matching channels are active
+                noResults.innerHTML = 'All matching channels are currently active.';
+            } else {
+                // No channels match the search
+                noResults.innerHTML = 'No channels found matching your search.';
+            }
+            noResults.style.display = 'block';
+            channelsGrid.style.display = 'none';
+        } else if (nonActiveChannels.length === 0 && !searchQuery) {
+            // All channels are active
+            noResults.innerHTML = 'All channels are currently active.';
+            noResults.style.display = 'block';
+            channelsGrid.style.display = 'none';
+        } else {
+            noResults.style.display = 'none';
+            channelsGrid.style.display = 'grid';
+        }
+        
+        // Render non-active channels in main grid
+        nonActiveChannels.forEach(num => {
+            const channel = createChannelElement(num, false);
+            channelsGrid.appendChild(channel);
+        });
+        
+        // Render active channels in separate section
+        const activeChannels = [...activeChannelSet].sort((a, b) => a - b);
+        activeChannels.forEach(num => {
+            const channel = createChannelElement(num, true, true);
+            activeChannelsGrid.appendChild(channel);
+        });
+        
+        // Show/hide active section
+        if (activeChannels.length === 0) {
+            noActive.style.display = 'block';
+            activeChannelsGrid.style.display = 'none';
+        } else {
+            noActive.style.display = 'none';
+            activeChannelsGrid.style.display = 'grid';
+        }
+        
+        updateStats(nonActiveChannels.length);
+    }
+    
+    // Filter channels based on search
+    function filterChannels(query) {
+        if (!query) return allChannels;
+        
+        // Handle range queries (e.g., "50-60", "100-150")
+        const rangeMatch = query.match(/^(\d+)-(\d+)$/);
+        if (rangeMatch) {
+            const start = parseInt(rangeMatch[1]);
+            const end = parseInt(rangeMatch[2]);
+            return allChannels.filter(num => num >= start && num <= end);
+        }
+        
+        // Handle comma-separated queries (e.g., "1,5,10")
+        if (query.includes(',')) {
+            const numbers = query.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            return allChannels.filter(num => numbers.includes(num));
+        }
+        
+        // Handle single number or partial match
+        const searchNum = parseInt(query);
+        if (!isNaN(searchNum)) {
+            // Exact match first, then partial matches
+            const exact = allChannels.filter(num => num === searchNum);
+            const partial = allChannels.filter(num => 
+                num !== searchNum && num.toString().includes(query)
+            );
+            return [...exact, ...partial];
+        }
+        
+        return allChannels.filter(num => num.toString().includes(query));
+    }
+    
+    // Update statistics - now reflects only non-active channels in visible count
+    function updateStats(visibleNonActive = 0) {
+        if (totalChannels) totalChannels.textContent = TOTAL_CHANNELS;
+        if (visibleChannels) visibleChannels.textContent = visibleNonActive;
+        if (activeCount) activeCount.textContent = activeChannelSet.size;
+    }
+    
+    // Event listeners
+    if (searchInput) {
+        searchInput.addEventListener('input', updateChannelDisplay);
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                updateChannelDisplay();
+            }
+        });
+    }
+    
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            updateChannelDisplay();
+            searchInput.focus();
+        });
+    }
+    
+    if (clearActiveBtn) {
+        clearActiveBtn.addEventListener('click', () => {
+            if (activeChannelSet.size > 0) {
+                if (confirm(`Clear all ${activeChannelSet.size} active channels?`)) {
+                    activeChannelSet.clear();
+                    saveActiveChannels();
+                    updateChannelDisplay();
+                }
+            }
+        });
+    }
+    
+    // Initialize
+    loadActiveChannels();
+    generateChannels();
+    updateChannelDisplay();
+});
+  </script>
 </body>
 </html>
