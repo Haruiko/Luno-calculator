@@ -409,19 +409,23 @@
         }
 
         this.saveActiveChannels();
-        this.updateChannelStates();
-        this.updateActiveSection();
-        this.updateStats();
+        this.refreshDisplay();
       }
 
       updateChannelStates() {
         // Update all channel buttons
         document.querySelectorAll('.channel-btn').forEach(btn => {
           const channelNum = parseInt(btn.dataset.channel);
-          if (this.activeChannels.includes(channelNum)) {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
+          
+          // Only update buttons in the main grid (not active section)
+          if (btn.parentElement && btn.parentElement.id === 'channelsGrid') {
+            if (this.activeChannels.includes(channelNum)) {
+              // Hide from main grid if active
+              btn.style.display = 'none';
+            } else {
+              // Show in main grid if not active
+              btn.style.display = 'block';
+            }
           }
         });
       }
@@ -463,10 +467,19 @@
         let visibleCount = 0;
 
         if (!query.trim()) {
-          // Show all channels
+          // Show all non-active channels
           this.allChannels.forEach(btn => {
-            btn.classList.remove('hidden');
-            visibleCount++;
+            const channelNum = parseInt(btn.dataset.channel);
+            
+            // Only show if not active
+            if (!this.activeChannels.includes(channelNum)) {
+              btn.classList.remove('hidden');
+              btn.style.display = 'block';
+              visibleCount++;
+            } else {
+              btn.classList.add('hidden');
+              btn.style.display = 'none';
+            }
           });
         } else {
           // Parse search query
@@ -474,11 +487,15 @@
           
           this.allChannels.forEach(btn => {
             const channelNum = parseInt(btn.dataset.channel);
-            if (matches.includes(channelNum)) {
+            
+            // Show if matches search AND not active
+            if (matches.includes(channelNum) && !this.activeChannels.includes(channelNum)) {
               btn.classList.remove('hidden');
+              btn.style.display = 'block';
               visibleCount++;
             } else {
               btn.classList.add('hidden');
+              btn.style.display = 'none';
             }
           });
         }
@@ -523,6 +540,16 @@
         this.searchChannels('');
       }
 
+      // Refresh display after changes
+      refreshDisplay() {
+        this.updateChannelStates();
+        this.updateActiveSection();
+        this.updateStats();
+        // Re-apply current search to maintain filtering
+        const currentSearch = document.getElementById('searchInput').value;
+        this.searchChannels(currentSearch);
+      }
+
       clearActiveChannels() {
         if (this.activeChannels.length === 0) {
           return;
@@ -531,9 +558,7 @@
         if (confirm(`Clear all ${this.activeChannels.length} active channels?`)) {
           this.activeChannels = [];
           this.saveActiveChannels();
-          this.updateChannelStates();
-          this.updateActiveSection();
-          this.updateStats();
+          this.refreshDisplay();
         }
       }
 
