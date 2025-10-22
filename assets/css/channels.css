@@ -129,12 +129,12 @@ body {
 /* Channels Grid */
 .channels-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(20px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
 
-.channel-card {
+.channel {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
@@ -143,14 +143,14 @@ body {
   cursor: pointer;
 }
 
-.channel-card:hover {
+.channel:hover {
   border-color: var(--accent);
   background: rgba(79, 140, 201, 0.05);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.channel-card.active {
+.channel.active {
   border-color: var(--success);
   background: rgba(63, 185, 80, 0.1);
 }
