@@ -1,0 +1,82 @@
+/* Profit Calculator Styles */
+:root {
+  --bg-dark: #0e1621;
+  --panel: #1b2838;
+  --panel-2: #172230;
+  --text: #e5e9f0;
+  --muted: #a3b1c6;
+  --accent: #4f8cc9;
+  --accent-2: #5fa0e0;
+  --success: #3fb950;
+  --warning: #f59e0b;
+  --radius: 12px;
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+body { 
+  margin: 0; 
+  padding: 24px; 
+  background: var(--bg-dark); 
+  color: var(--text); 
+  font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+h1,h2,h3 { margin: 0 0 8px; }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+
+/* Header bar with Home button */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 16px 18px; background: var(--panel); border:1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+}
+.topbar h1{ margin:0; font-size: 24px; color: var(--accent); }
+.home-btn{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+  border-radius: 10px; border:1px solid rgba(255,255,255,0.2); background: var(--panel-2); color:var(--text);
+  text-decoration:none; font-weight:500;
+}
+.home-btn:hover{ border-color: var(--accent); background: var(--panel); }
+.home-btn .arrow{ font-size:16px; line-height:1; }
+
+.card { background: var(--panel); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 12px; }
+.row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 10px; align-items: center; }
+.row + .row { margin-top: 10px; }
+
+/* responsive inputs row so "Deposit fee" can sit beside Daily focus */
+.inputs-row{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+label { font-size: 12px; color: var(--muted); display:block; margin-bottom: 6px; }
+input[type="number"], input[type="text"] {
+  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+  background: var(--panel-2); color: var(--text);
+}
+input[type="number"]:focus, input[type="text"]:focus { outline: 2px solid rgba(79,140,201,0.3); border-color: var(--accent); }
+
+button { border: 1px solid rgba(255,255,255,0.2); background: var(--panel-2); color: var(--text); padding: 10px 12px; border-radius: 10px; cursor:pointer; }
+button:hover { border-color: var(--accent); background: var(--panel); }
+
+.danger { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444; }
+.success { color: var(--success); }
+.warn { color: var(--warning); }
+.muted { color: var(--muted); }
+.flex { display:flex; gap:10px; flex-wrap:wrap; }
+.right { text-align:right; }
+.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pill { font-size: 12px; padding: 4px 8px; border-radius: 999px; border:1px solid rgba(255,255,255,0.2); background: var(--panel-2); }
+.hr { height:1px; background: rgba(255,255,255,0.1); margin: 12px 0; border:0; }
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td { border-bottom:1px solid rgba(255,255,255,0.1); padding:10px; text-align:left; }
+.table th { color: var(--muted); font-weight:600; }
+.total { font-weight:700; }
+.footer { color: var(--muted); font-size:12px; }
+.small { font-size: 12px; }
+.hidden {display: none;}
