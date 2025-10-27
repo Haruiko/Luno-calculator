@@ -1,0 +1,268 @@
+/* Weekly Lifestyle Mission Styles */
+:root {
+  --bg-dark: #0e1621;
+  --panel: #1b2838;
+  --panel-2: #172230;
+  --text: #e5e9f0;
+  --muted: #a3b1c6;
+  --accent: #4f8cc9;
+  --accent-2: #5fa0e0;
+  --success: #3fb950;
+  --active: #22c55e;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.card {
+  width: min(900px, 100%);
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--accent);
+  letter-spacing: 0.2px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.home-link {
+  text-decoration: none;
+  color: var(--text);
+  background: var(--panel-2);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: 0.2s ease;
+  font-weight: 600;
+}
+
+.home-link:hover { 
+  background: var(--accent); 
+  color: var(--text);
+}
+
+/* Progress ring */
+.progress {
+  position: relative;
+  width: 82px; 
+  height: 82px;
+}
+
+.progress svg { 
+  transform: rotate(-90deg);
+}
+
+.progress .track { 
+  stroke: rgba(255,255,255,0.1);
+}
+
+.progress .indicator { 
+  stroke: var(--accent-2); 
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+.progress .label {
+  position: absolute; 
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-weight: 700; 
+  font-size: 0.95rem; 
+  color: var(--text);
+}
+
+/* Task list */
+.list {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  background: var(--panel-2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 16px;
+  transition: 0.2s ease;
+  cursor: pointer;
+}
+
+.item:hover {
+  border-color: var(--accent);
+  background: rgba(79,140,201,0.1);
+}
+
+.item.done {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--active);
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-name {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 500;
+  user-select: none;
+}
+
+.item-exchange {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.item-quantity {
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 40px;
+}
+
+.done .item-name { 
+  color: var(--muted); 
+  text-decoration: line-through; 
+}
+
+.done .item-exchange {
+  opacity: 0.7;
+}
+
+.row-end {
+  margin-top: 16px;
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  justify-content: flex-end;
+}
+
+.btn {
+  background: var(--panel-2);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer; 
+  transition: 0.2s; 
+  font-weight: 600;
+}
+
+.btn:hover { 
+  background: var(--accent); 
+  border-color: var(--accent);
+}
+
+.btn.secondary {
+  background: transparent; 
+  border-color: rgba(255,255,255,0.2); 
+  color: var(--muted);
+}
+
+.btn.secondary:hover { 
+  border-color: rgba(255,255,255,0.4); 
+  color: var(--text); 
+}
+
+footer { 
+  margin-top: 14px; 
+  color: var(--muted); 
+  font-size: 0.9rem; 
+  text-align: right; 
+}
+
+@media (max-width: 768px) {
+  .card {
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .topbar {
+    justify-content: space-between;
+  }
+  
+  h1 {
+    font-size: 1.4rem;
+  }
+  
+  .progress {
+    align-self: center;
+  }
+  
+  .item {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px;
+  }
+  
+  .item-quantity {
+    grid-column: 2;
+    text-align: right;
+  }
+  
+  .item-name {
+    font-size: 0.95rem;
+  }
+}

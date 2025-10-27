@@ -60,7 +60,7 @@ p {
   text-decoration: none;
   color: var(--text-main);
   transition: all 0.3s ease;
-  width: 280px;
+  width: 240px;
   position: relative;
   overflow: hidden;
 }
@@ -113,7 +113,7 @@ p {
   }
   
   .nav-button {
-    width: 250px;
+    width: 220px;
     padding: 20px;
   }
   
@@ -136,5 +136,15 @@ p {
   .nav-button {
     width: 100%;
     max-width: 280px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .nav-buttons {
+    justify-content: center;
+  }
+  
+  .nav-button {
+    width: 220px;
   }
 }
